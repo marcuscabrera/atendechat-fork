@@ -1,0 +1,9 @@
+credentials.txt
+/home/deploy/mandivia/frontend/.env
+/home/deploy/mandivia/backend/.env
+/home/deploy/.cache/
+/home/deploy/.npm/
+/home/deploy/.pm2/
+/home/deploy/mandivia/backend/node_modules/
+/home/deploy/mandivia/frontend/node_modules/
+/.idea
