@@ -18,6 +18,8 @@ contactRoutes.get("/contacts/list", isAuth, ContactController.list);
 
 contactRoutes.get("/contacts/:contactId", isAuth, ContactController.show);
 
+contactRoutes.post("/contacts/findOrCreate", isAuth, ContactController.findOrCreate);
+
 contactRoutes.post("/contacts", isAuth, ContactController.store);
 
 contactRoutes.put("/contacts/:contactId", isAuth, ContactController.update);

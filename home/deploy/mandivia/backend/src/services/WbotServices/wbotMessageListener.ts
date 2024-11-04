@@ -325,6 +325,26 @@ export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
   try {
     let type = getTypeMessage(msg);
 
+    const extractArrayVcard = (msg: proto.IWebMessageInfo) => {
+
+      if (!msg?.message?.contactsArrayMessage) return null;
+
+      const { contacts } = msg.message.contactsArrayMessage;
+
+      const vCardArray = [];
+
+      contacts.forEach((contact: proto.Message.IContactMessage) => {
+
+        vCardArray.push(contact.vcard);
+
+
+      });
+
+      return JSON.stringify(vCardArray);
+
+    };
+
+
     const types = {
       conversation: msg?.message?.conversation,
       editedMessage: msg?.message?.editedMessage?.message?.protocolMessage?.editedMessage?.conversation,
@@ -338,7 +358,7 @@ export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
       viewOnceMessage: getBodyButton(msg) || msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
       stickerMessage: "sticker",
       contactMessage: msg.message?.contactMessage?.vcard,
-      contactsArrayMessage: "varios contatos",
+      contactsArrayMessage: extractArrayVcard(msg),
       //locationMessage: `Latitude: ${msg.message.locationMessage?.degreesLatitude} - Longitude: ${msg.message.locationMessage?.degreesLongitude}`,
       locationMessage: msgLocation(
         msg.message?.locationMessage?.jpegThumbnail,

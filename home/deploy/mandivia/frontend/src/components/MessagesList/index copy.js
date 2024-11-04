@@ -32,7 +32,6 @@ import whatsBackgroundDark from "../../assets/wa-background-dark.png"; //DARK MO
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { socketConnection } from "../../services/socket";
-import VcardPreview from "../VcardPreview";
 
 const useStyles = makeStyles((theme) => ({
   messagesListWrapper: {
@@ -191,7 +190,7 @@ const useStyles = makeStyles((theme) => ({
     overflowWrap: "break-word",
     padding: "3px 80px 6px 6px",
   },
-
+  
   textContentItemEdited: {
     overflowWrap: "break-word",
     padding: "3px 120px 6px 6px",
@@ -424,19 +423,6 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     setAnchorEl(null);
   };
 
-  const extrairNomeENumero = (vcard) => {
-    const nomeMatch = vcard.match(/FN:(.*?)\n/);
-    const nome = nomeMatch ? nomeMatch[1] : '';
-
-    const numeroMatch = vcard.match(/waid=(\d+)/);
-    const numero = numeroMatch ? numeroMatch[1].replace(/\D/g, '') : '';
-    if (nome && numero) {
-      return { nome, numero };
-    } else {
-      return null;
-    }
-  }
-
   const checkMessageMedia = (message) => {
     if (message.mediaType === "locationMessage" && message.body.split('|').length >= 2) {
       let locationParts = message.body.split('|')
@@ -450,28 +436,41 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
 
       return <LocationPreview image={imageLocation} link={linkLocation} description={descriptionLocation} />
     }
-
-    if (message.mediaType === "contactMessage") {
-
-      const vcardPreviewInfo = extrairNomeENumero(message.body)
-
-      return <VcardPreview key={message.id} contact={vcardPreviewInfo?.nome} number={vcardPreviewInfo?.numero} />
-    }
-
-    if (message.mediaType === "contactsArrayMessage") {
-
-      const contactsArray = JSON.parse(message.body);
-
-      return contactsArray.map((contact, index) => {
-
-        const vcardPreviewInfo = extrairNomeENumero(contact)
-
-
-        return <VcardPreview key={index} contact={vcardPreviewInfo?.nome} number={vcardPreviewInfo?.numero} />
-      })
-
-    }
-
+    /* else if (message.mediaType === "vcard") {
+      let array = message.body.split("\n");
+      let obj = [];
+      let contact = "";
+      for (let index = 0; index < array.length; index++) {
+        const v = array[index];
+        let values = v.split(":");
+        for (let ind = 0; ind < values.length; ind++) {
+          if (values[ind].indexOf("+") !== -1) {
+            obj.push({ number: values[ind] });
+          }
+          if (values[ind].indexOf("FN") !== -1) {
+            contact = values[ind + 1];
+          }
+        }
+      }
+      return <VcardPreview contact={contact} numbers={obj[0].number} />
+    } */
+    /*else if (message.mediaType === "multi_vcard") {
+      console.log("multi_vcard")
+      console.log(message)
+    	
+      if(message.body !== null && message.body !== "") {
+        let newBody = JSON.parse(message.body)
+        return (
+          <>
+            {
+            newBody.map(v => (
+              <VcardPreview contact={v.name} numbers={v.number} />
+            ))
+            }
+          </>
+        )
+      } else return (<></>)
+    }*/
     else if (message.mediaType === "image") {
       return <ModalImageCors imageUrl={message.mediaUrl} />;
     } else if (message.mediaType === "audio") {
@@ -736,17 +735,14 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                   </div>
                 )}
 
-                {(message.mediaUrl || message.mediaType === "locationMessage" || message.mediaType === "contactMessage" || message.mediaType === 'contactsArrayMessage') && checkMessageMedia(message)}
-
-
-
+                {(message.mediaUrl || message.mediaType === "locationMessage" || message.mediaType === "vcard"
+                  //|| message.mediaType === "multi_vcard" 
+                ) && checkMessageMedia(message)}
                 <div className={classes.textContentItem}>
                   {message.quotedMsg && renderQuotedMessage(message)}
-                  {/* <MarkdownWrapper>{message.mediaType === "locationMessage" ? null : message.body}</MarkdownWrapper> */}
-                  <MarkdownWrapper>{(message.mediaType === 'contactMessage' || message.mediaType === 'contactsArrayMessage' || message.mediaType === "locationMessage") ? null : message.body}</MarkdownWrapper>
-
+                  <MarkdownWrapper>{message.mediaType === "locationMessage" ? null : message.body}</MarkdownWrapper>
                   <span className={classes.timestamp}>
-                    {message.isEdited && <span>Editada </span>}
+				    {message.isEdited && <span>Editada </span>}
                     {format(parseISO(message.createdAt), "HH:mm")}
                   </span>
                 </div>
@@ -770,13 +766,13 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                 >
                   <ExpandMore />
                 </IconButton>
-                {/* {(message.mediaUrl || message.mediaType === "locationMessage" || message.mediaType === "vcard" ) && checkMessageMedia(message)} */}
-
-                {(message.mediaUrl || message.mediaType === "locationMessage" || message.mediaType === "contactMessage" || message.mediaType === 'contactsArrayMessage') && checkMessageMedia(message)}
+                {(message.mediaUrl || message.mediaType === "locationMessage" || message.mediaType === "vcard"
+                  //|| message.mediaType === "multi_vcard" 
+                ) && checkMessageMedia(message)}
                 <div
                   className={clsx(classes.textContentItem, {
                     [classes.textContentItemDeleted]: message.isDeleted,
-                    [classes.textContentItemEdited]: message.isEdited,
+					[classes.textContentItemEdited]: message.isEdited,
                   })}
                 >
                   {message.isDeleted && (
@@ -787,10 +783,9 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                     />
                   )}
                   {message.quotedMsg && renderQuotedMessage(message)}
-                  {/* <MarkdownWrapper>{message.body}</MarkdownWrapper> */}
-                  <MarkdownWrapper>{(message.mediaType === 'contactMessage' || message.mediaType === 'contactsArrayMessage' || message.mediaType === "locationMessage") ? null : message.body}</MarkdownWrapper>
+                  <MarkdownWrapper>{message.body}</MarkdownWrapper>
                   <span className={classes.timestamp}>
-                    {message.isEdited && <span>Editada </span>}
+				    {message.isEdited && <span>Editada </span>}
                     {format(parseISO(message.createdAt), "HH:mm")}
                     {renderMessageAck(message)}
                   </span>
