@@ -1,3 +1,4 @@
+import AppError from "../../errors/AppError";
 import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
 import { getWbot } from "../../libs/wbot";
 
@@ -11,17 +12,15 @@ const checker = async (number: string, wbot: any) => {
   return validNumber;
 };
 
-const CheckContactNumber = async (
-  number: string,
-  companyId: number
-): Promise<IOnWhatsapp> => {
+const CheckContactNumber = async (number: string, companyId: number): Promise<IOnWhatsapp> => {
   const defaultWhatsapp = await GetDefaultWhatsApp(companyId);
 
   const wbot = getWbot(defaultWhatsapp.id);
   const isNumberExit = await checker(number, wbot);
 
-  if (!isNumberExit.exists) {
-    throw new Error("ERR_CHECK_NUMBER");
+
+  if (!isNumberExit?.exists) {
+    throw new AppError("ERR_CHECK_NUMBER");
   }
   return isNumberExit;
 };

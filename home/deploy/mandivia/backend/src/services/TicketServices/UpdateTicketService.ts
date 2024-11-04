@@ -143,7 +143,7 @@ const UpdateTicketService = async ({
         ticketTraking.rated = false;
       }
 
-      if (!isNil(complationMessage) && complationMessage !== "") {
+      if (!isNil(complationMessage) && complationMessage !== "" && !ticket.isGroup) {
         const body = `\u200e${complationMessage}`;
         await SendWhatsAppMessage({ body, ticket });
       }
@@ -229,7 +229,7 @@ const UpdateTicketService = async ({
                 }
               );
               await verifyMessage(queueChangedMessage, ticket, ticket.contact);
-            }      
+            }
     }
 
     await ticket.update({

@@ -327,7 +327,7 @@ export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
 
     const types = {
       conversation: msg?.message?.conversation,
-	  editedMessage: msg?.message?.editedMessage?.message?.protocolMessage?.editedMessage?.conversation,
+      editedMessage: msg?.message?.editedMessage?.message?.protocolMessage?.editedMessage?.conversation,
       imageMessage: msg.message?.imageMessage?.caption,
       videoMessage: msg.message?.videoMessage?.caption,
       extendedTextMessage: msg.message?.extendedTextMessage?.text,
@@ -451,7 +451,10 @@ const downloadMedia = async (msg: proto.IWebMessageInfo) => {
     // Trate o erro de acordo com as suas necessidades
   }
 
-  let filename = msg.message?.documentMessage?.fileName || "";
+
+  let filename = msg.message?.documentMessage?.fileName || msg.message?.documentWithCaptionMessage?.message?.documentMessage?.fileName || "";
+
+
 
   const mineType =
     msg.message?.imageMessage ||
@@ -463,14 +466,17 @@ const downloadMedia = async (msg: proto.IWebMessageInfo) => {
     msg.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage ||
     msg.message?.extendedTextMessage?.contextInfo?.quotedMessage?.videoMessage;
 
-  if (!mineType)
-    console.log(msg)
+
+
 
   if (!filename) {
     const ext = mineType.mimetype.split("/")[1].split(";")[0];
     filename = `${new Date().getTime()}.${ext}`;
   } else {
-    filename = `${new Date().getTime()}_${filename}`;
+    const ext = filename.split(".").pop();
+    // remove a extensão do arquivo
+    filename = filename.replace(/\.[^/.]+$/, "");
+    filename = `${filename}_${new Date().getTime()}.${ext}`;
   }
 
   const media = {
@@ -843,7 +849,7 @@ const verifyMediaMessage = async (
   }
 
   const body = getBodyMessage(msg);
-  
+
 
   const messageData = {
     id: msg.key.id,
@@ -921,7 +927,7 @@ export const verifyMessage = async (
     remoteJid: msg.key.remoteJid,
     participant: msg.key.participant,
     dataJson: JSON.stringify(msg),
-	isEdited: isEdited,
+    isEdited: isEdited,
   };
 
   await ticket.update({
@@ -967,7 +973,7 @@ const isValidMsg = (msg: proto.IWebMessageInfo): boolean => {
     const ifType =
       msgType === "conversation" ||
       msgType === "extendedTextMessage" ||
-	  msgType === "editedMessage" ||
+      msgType === "editedMessage" ||
       msgType === "audioMessage" ||
       msgType === "videoMessage" ||
       msgType === "imageMessage" ||
@@ -1747,7 +1753,7 @@ const handleMessage = async (
 
     // voltar para o menu inicial
 
-    if (bodyMessage == "#") {
+    if (bodyMessage == "#" && !isGroup) {
       await ticket.update({
         queueOptionId: null,
         chatbot: false,
@@ -1803,7 +1809,7 @@ const handleMessage = async (
       console.log(e);
     }
 
-    // Atualiza o ticket se a ultima mensagem foi enviada por mim, para que possa ser finalizado. 
+    // Atualiza o ticket se a ultima mensagem foi enviada por mim, para que possa ser finalizado.
     try {
       await ticket.update({
         fromMe: msg.key.fromMe,
@@ -1976,7 +1982,7 @@ const handleMessage = async (
       !ticket.isGroup &&
       !ticket.userId &&
       ticket.integrationId &&
-      ticket.useIntegration && 
+      ticket.useIntegration &&
       ticket.queue
     ) {
 

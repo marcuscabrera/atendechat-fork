@@ -57,6 +57,7 @@
     "yup": "^0.32.8"
   },
   "scripts": {
+    "dev": "react-scripts --openssl-legacy-provider start",
     "start": "react-scripts start",
     "build": "GENERATE_SOURCEMAP=false react-scripts build",
     "builddev": "react-scripts build",

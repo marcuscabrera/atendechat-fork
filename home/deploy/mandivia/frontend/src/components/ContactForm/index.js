@@ -17,33 +17,33 @@ import toastError from "../../errors/toastError";
 import { Grid } from "@material-ui/core";
 
 const useStyles = makeStyles(theme => ({
-	root: {
-		display: "flex",
-		flexWrap: "wrap",
-	},
-	textField: {
-		marginRight: theme.spacing(1),
-		flex: 1,
-	},
+    root: {
+        display: "flex",
+        flexWrap: "wrap",
+    },
+    textField: {
+        marginRight: theme.spacing(1),
+        flex: 1,
+    },
 
-	extraAttr: {
-		display: "flex",
-		justifyContent: "center",
-		alignItems: "center",
-	},
+    extraAttr: {
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+    },
 
-	btnWrapper: {
-		position: "relative",
-	},
+    btnWrapper: {
+        position: "relative",
+    },
 
-	buttonProgress: {
-		color: green[500],
-		position: "absolute",
-		top: "50%",
-		left: "50%",
-		marginTop: -12,
-		marginLeft: -12,
-	},
+    buttonProgress: {
+        color: green[500],
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        marginTop: -12,
+        marginLeft: -12,
+    },
 
     textCenter: {
         backgroundColor: 'red'
@@ -51,38 +51,39 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const ContactSchema = Yup.object().shape({
-	name: Yup.string()
-		.min(2, "Too Short!")
-		.max(50, "Too Long!")
-		.required("Required"),
-	number: Yup.string().min(8, "Too Short!").max(50, "Too Long!"),
-	email: Yup.string().email("Invalid email"),
+    name: Yup.string()
+        .min(2, "Too Short!")
+        .max(50, "Too Long!")
+        .required("Required"),
+    number: Yup.string().min(8, "Too Short!").max(50, "Too Long!"),
+    email: Yup.string().email("Invalid email"),
 });
 
-export function ContactForm ({ initialContact, onSave, onCancel }) {
-	const classes = useStyles();
+export function ContactForm({ initialContact, onSave, onCancel }) {
+    const classes = useStyles();
 
-	const [contact, setContact] = useState(initialContact);
+    const [contact, setContact] = useState(initialContact);
 
     useEffect(() => {
         setContact(initialContact);
     }, [initialContact]);
 
-	const handleSaveContact = async values => {
-		try {
-			if (contact.id) {
-				await api.put(`/contacts/${contact.id}`, values);
-			} else {
-				const { data } = await api.post("/contacts", values);
-				if (onSave) {
-					onSave(data);
-				}
-			}
-			toast.success(i18n.t("contactModal.success"));
-		} catch (err) {
-			toastError(err);
-		}
-	};
+    const handleSaveContact = async values => {
+        try {
+            if (contact.id) {
+                await api.put(`/contacts/${contact.id}`, values);
+            } else {
+                const { data } = await api.post("/contacts", values);
+                if (onSave) {
+                    onSave(data);
+                }
+            }
+            toast.success(i18n.t("contactModal.success"));
+        } catch (err) {
+            console.log('err', err);
+            toastError(err);
+        }
+    };
 
     return (
         <Formik
