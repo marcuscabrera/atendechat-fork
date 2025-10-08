@@ -20,12 +20,13 @@ RUN npm prune --production
 
 FROM node:18-slim AS runner
 
-ENV NODE_ENV=production
+ENV NODE_ENV=production \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 WORKDIR /app
 
 # Install system dependencies required at runtime
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends ffmpeg tini \
+  && apt-get install -y --no-install-recommends chromium ffmpeg tini \
   && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/package*.json ./
