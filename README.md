@@ -80,6 +80,20 @@ Atendechat é uma plataforma omnichannel para atendimento via WhatsApp que reún
 ## Automação completa (opcional)
 Para implantações completas em servidores Linux, utilize os scripts do diretório `home/atendechat-instalador`. O script `install_primaria` provê instalação primária (dependências do sistema, clone do repositório, build e configuração de nginx/certbot). Consulte os scripts e adapte variáveis em `home/atendechat-instalador/variables` conforme o ambiente alvo.
 
+## Executando com Docker
+Uma alternativa ao setup manual é utilizar os arquivos de contêiner incluídos neste repositório. Eles provisionam PostgreSQL, Redis, o backend Node.js e o frontend React prontos para uso local.
+
+1. Copie (ou ajuste) os valores padrão das variáveis no arquivo `docker-compose.yml` caso deseje customizar segredos ou apontar para serviços externos.
+2. Construa as imagens e inicialize os serviços:
+   ```bash
+   docker compose up --build
+   ```
+3. A aplicação ficará disponível em:
+   - Frontend: http://localhost:3000
+   - Backend/API: http://localhost:8080
+
+O volume nomeado `backend_public` preserva os arquivos enviados pelo backend, enquanto `postgres_data` e `redis_data` retêm dados do banco e cache. Para redefinir o ambiente, remova esses volumes com `docker compose down -v`.
+
 ## Estrutura do repositório
 ```
 ├── README.md

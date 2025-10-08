@@ -1,0 +1,89 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:14-alpine
+    container_name: atendechat-postgres
+    environment:
+      POSTGRES_DB: atendechat
+      POSTGRES_USER: atendechat
+      POSTGRES_PASSWORD: atendechat
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U atendechat"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: atendechat-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build:
+      context: ./home/deploy/mandivia/backend
+      dockerfile: Dockerfile
+    container_name: atendechat-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      BACKEND_URL: http://localhost:8080
+      FRONTEND_URL: http://localhost:3000
+      PROXY_PORT: 8080
+      DB_DIALECT: postgres
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: atendechat
+      DB_PASS: atendechat
+      DB_NAME: atendechat
+      JWT_SECRET: kZaOTd+YZpjRUyyuQUpigJaEMk4vcW4YOymKPZX0Ts8=
+      JWT_REFRESH_SECRET: dBSXqFg9TaNUEDXVp6fhMTRLBysP+j2DSqf7+raxD3A=
+      REDIS_URI: redis://redis:6379
+      REDIS_OPT_LIMITER_MAX: 1
+      REDIS_OPT_LIMITER_DURATION: 3000
+      USER_LIMIT: 10000
+      CONNECTIONS_LIMIT: 100000
+      CLOSED_SEND_BY_ME: "true"
+      GERENCIANET_SANDBOX: "false"
+      GERENCIANET_CLIENT_ID: Client_Id_Gerencianet
+      GERENCIANET_CLIENT_SECRET: Client_Secret_Gerencianet
+      GERENCIANET_PIX_CERT: certificado-Gerencianet
+      GERENCIANET_PIX_KEY: chave-pix-gerencianet
+    ports:
+      - "8080:8080"
+    volumes:
+      - backend_public:/app/public
+      - ./home/deploy/mandivia/backend/certs:/app/certs:ro
+
+  frontend:
+    build:
+      context: ./home/deploy/mandivia/frontend
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_BACKEND_URL: http://localhost:8080
+        REACT_APP_HOURS_CLOSE_TICKETS_AUTO: 24
+    container_name: atendechat-frontend
+    depends_on:
+      backend:
+        condition: service_started
+    ports:
+      - "3000:80"
+
+volumes:
+  postgres_data:
+  redis_data:
+  backend_public:
