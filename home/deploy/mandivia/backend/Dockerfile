@@ -2,8 +2,7 @@
 
 FROM node:18-slim AS builder
 
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1 \
-    NPM_CONFIG_FUND=false \
+ENV NPM_CONFIG_FUND=false \
     NPM_CONFIG_AUDIT=false
 
 WORKDIR /app
