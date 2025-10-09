@@ -1,11 +1,11 @@
 option=0;
-mysql_root_password="6eRcgn5031Jt"
-link_git="https://atendechat@github.com/atendechat/atendechat-v5.2.1.git"
-instancia_add="mandivia"
+mysql_root_password="6eRcgn5031Jt@6eRcgn5031Jt@6eRcgn5031Jt"
+link_git="https://github.com/marcuscabrera/atendechat-fork.git"
+instancia_add="mvcapp"
 max_whats=9999
 max_user=9999
-frontend_url="chat.mandivia.com.br"
-backend_url="api.mandivia.com.br"
+frontend_url="chat.mvcapp.com.br"
+backend_url="api.mvcapp.com.br"
 frontend_port=3000
 backend_port=4000
 redis_port=5000
